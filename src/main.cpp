@@ -8,6 +8,7 @@
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 bool checkShaderCompilation(GLuint shader, GLenum type);
+bool checkProgramLinking(GLuint program);
 
 int main(void) {
     glfwInit();
@@ -33,15 +34,29 @@ int main(void) {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f, 
-         0.0f,  0.5f, 0.0f
+         0.5f, -0.5f, 0.0f,
+         0.5f,  0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f 
     };
-
-    unsigned int VBO;
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+    unsigned int VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     const char* vertexShaderSrc = "#version 330 core\n"
     "layout (location=0) in vec3 pos;\n"
@@ -74,6 +89,10 @@ int main(void) {
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
     glLinkProgram(program);
+
+    if (!checkProgramLinking(program))
+        return -1;
+
     glUseProgram(program);
 
     glDeleteShader(vertexShader);
@@ -84,6 +103,8 @@ int main(void) {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -125,5 +146,19 @@ bool checkShaderCompilation(GLuint shader, GLenum type) {
         return 0;
     }
 
+    return 1;
+}
+
+bool checkProgramLinking(GLuint program) {
+    int success;
+    char infoLog[512];
+
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        glGetProgramInfoLog(program, 512, nullptr, infoLog);
+        std::cout << "Error Linking Program:\n" << infoLog;
+        return 0;
+    }
     return 1;
 }
