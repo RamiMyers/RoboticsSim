@@ -25,5 +25,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glfw glm)
 
 add_library(glad src/glad.c)
+add_library(Shader src/Shader.cpp)
 
-target_link_libraries(${PROJECT_NAME} glad glfw glm)
+target_link_libraries(${PROJECT_NAME} glad glfw glm Shader)

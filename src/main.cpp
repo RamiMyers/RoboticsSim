@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <Shader.h>
+
 #define WIDTH 800
 #define HEIGHT 600
 
@@ -58,51 +60,16 @@ int main(void) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    const char* vertexShaderSrc = "#version 330 core\n"
-    "layout (location=0) in vec3 pos;\n"
-    "void main() {\n"
-    "   gl_Position = vec4(pos, 1.0f);\n"
-    "}\n";
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-    glShaderSource(vertexShader, 1, &vertexShaderSrc, nullptr);
-    glCompileShader(vertexShader);
-
-    if (!checkShaderCompilation(vertexShader, GL_VERTEX_SHADER))
-        return -1;
-
-    const char* fragmentShaderSrc = "#version 330 core\n"
-    "out vec4 fragColor;\n"
-    "void main() {\n"
-    "   fragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n";
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(fragmentShader, 1, &fragmentShaderSrc, nullptr);
-    glCompileShader(fragmentShader);
-
-    if (!checkShaderCompilation(fragmentShader, GL_FRAGMENT_SHADER))
-        return -1;
-    
-    unsigned int program = glCreateProgram();
-
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    if (!checkProgramLinking(program))
-        return -1;
-
-    glUseProgram(program);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader shader("../shaders/vertexShader.glsl", "../shaders/fragmentShader.glsl");
+    shader.use();
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        shader.setVec4(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f), "inFragColor");
 
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
