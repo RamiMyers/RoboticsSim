@@ -9,8 +9,6 @@
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-bool checkShaderCompilation(GLuint shader, GLenum type);
-bool checkProgramLinking(GLuint program);
 
 int main(void) {
     glfwInit();
@@ -30,7 +28,6 @@ int main(void) {
         std::cout << "Failed to Load GLAD\n";
         return -1;
     }
-
     glViewport(0, 0, WIDTH, HEIGHT);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -69,7 +66,11 @@ int main(void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        shader.setVec4(glm::vec4(1.0f, 0.5f, 0.0f, 1.0f), "inFragColor");
+        double time = glfwGetTime();
+        double green = sin(time * 2) / 2.0f + 0.5f;
+        std::cout << green << "\n";
+        shader.setFloat(green, "xOffset");
+        shader.setVec4(glm::vec4(0.0f, green, 0.0f, 1.0f), "inFragColor");
 
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
@@ -88,44 +89,4 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-bool checkShaderCompilation(GLuint shader, GLenum type) {
-    int success;
-    char infoLog[512];
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-
-        switch (type) {
-            case GL_VERTEX_SHADER:
-                std::cout << "Error Compiling Vertex Shader:\n";
-                break;
-            default:
-                std::cout << "Error Compiling Shader:\n";
-                break;
-        }
-
-        std::cout << infoLog;
-
-        return 0;
-    }
-
-    return 1;
-}
-
-bool checkProgramLinking(GLuint program) {
-    int success;
-    char infoLog[512];
-
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-    if (!success) {
-        glGetProgramInfoLog(program, 512, nullptr, infoLog);
-        std::cout << "Error Linking Program:\n" << infoLog;
-        return 0;
-    }
-    return 1;
 }

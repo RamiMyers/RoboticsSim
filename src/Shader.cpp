@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 bool shaderCompilationStatus(GLuint shader, GLenum type);
 bool programLinkStatus(GLuint program);
@@ -35,7 +36,6 @@ Shader::Shader(const char* vertexShaderPath, const char* fragmentShaderPath) {
     const char* vsSrc = vsCode.c_str();
     const char* fsSrc = fsCode.c_str();
 
-    // Compile shaders and link program...
     GLuint vertexShader, fragmentShader;
 
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -57,6 +57,9 @@ Shader::Shader(const char* vertexShaderPath, const char* fragmentShaderPath) {
     glAttachShader(ID, fragmentShader);
     glLinkProgram(ID);
 
+    if (!programLinkStatus(ID))
+        exit(EXIT_FAILURE);
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
@@ -68,8 +71,12 @@ void Shader::use() {
     glUseProgram(ID);
 }
 
+void Shader::setFloat(float value, const char* name) {
+    glUniform1f(glGetUniformLocation(ID, name), value);
+}
+
 void Shader::setVec4(glm::vec4 vec, const char* name) {
-    glUniform4fv(glGetAttribLocation(ID, name), 1, glm::value_ptr(vec));
+    glUniform4fv(glGetUniformLocation(ID, name), 1, glm::value_ptr(vec));
 }
 
 bool shaderCompilationStatus(GLuint shader, GLenum type) {
