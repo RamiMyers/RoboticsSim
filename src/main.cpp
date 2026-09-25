@@ -1,6 +1,8 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <Shader.h>
 
@@ -60,6 +62,11 @@ int main(void) {
     Shader shader("../shaders/vertexShader.glsl", "../shaders/fragmentShader.glsl");
     shader.use();
 
+    glm::vec4 vec(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::mat4 trans(1.0f);
+    trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    vec *= trans;
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
@@ -68,8 +75,7 @@ int main(void) {
 
         double time = glfwGetTime();
         double green = sin(time * 2) / 2.0f + 0.5f;
-        std::cout << green << "\n";
-        shader.setFloat(green, "xOffset");
+        shader.setVec4(vec, "transform");
         shader.setVec4(glm::vec4(0.0f, green, 0.0f, 1.0f), "inFragColor");
 
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
