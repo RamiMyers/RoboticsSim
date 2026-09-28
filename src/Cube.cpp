@@ -48,11 +48,8 @@ Cube::Cube(Shader* shader) {
     -0.5f,  0.5f,  0.5f,
     -0.5f,  0.5f, -0.5f
     };
-    // std::cout << "Size: " << sizeof(vertices)/sizeof(float) << "\n"; 
-    // for (int i = 0; i < sizeof(vertices)/sizeof(float); i++) {
-    //     std::cout << "i: " << i << "\n";
-    //     std::cout << vertices[i] << "\n";
-    // }
+
+    this->shader = shader;
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -65,6 +62,20 @@ Cube::Cube(Shader* shader) {
     glEnableVertexAttribArray(0);
 }
 
+void Cube::translate(glm::vec3 vec) {
+    model = glm::translate(model, vec);
+}
+
+void Cube::rotate(float radians, glm::vec3 axis) {
+    model = glm::rotate(model, radians, axis);
+}
+
+void Cube::scale(glm::vec3 vec) {
+    model = glm::scale(model, vec);
+}
+
 void Cube::draw() {
+    shader->setMat4(model, "model");
+    model = glm::mat4(1.0f);
     glDrawArrays(GL_TRIANGLES, 0, NUM_VERTICES * 3);
 }

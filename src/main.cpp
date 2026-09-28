@@ -45,7 +45,7 @@ int main(void) {
 
     Cube cube(&shader);
 
-    glm::mat4 model(1.0f), view(1.0f);
+    glm::mat4 view(1.0f);
 
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
@@ -61,11 +61,9 @@ int main(void) {
 
         double time = glfwGetTime();
         double green = sin(time * 2) / 2.0f + 0.5f;
-        model = glm::mat4(1.0f);
-        model = glm::scale(model, glm::vec3(0.5f, 1.0f, 0.5f));
-        model = glm::rotate(model, float(time), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, float(time), glm::vec3(0.0f, 1.0f, 0.0f));
-        shader.setMat4(model, "model");
+        cube.translate(glm::vec3(0.0f));
+        cube.rotate(time, glm::vec3(1.0f, 0.0f, 0.0f));
+        cube.scale(glm::vec3(0.5f, 1.0f, 0.5f));
         shader.setMat4(view, "view");
         shader.setMat4(projection, "projection");
         shader.setVec4(glm::vec4(0.0f, green, 0.0f, 1.0f), "inFragColor");
