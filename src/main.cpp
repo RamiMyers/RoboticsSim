@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <Shader.h>
+#include <Cube.h>
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -14,6 +15,8 @@ void processInput(GLFWwindow* window);
 
 // TODO: Consolidate cube to its own class
 // TODO: Procedural cylinder
+
+glm::mat4 projection(1.0f);
 
 int main(void) {
     glfwInit();
@@ -37,76 +40,17 @@ int main(void) {
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    float vertices[] = {
-    -0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-    -0.5f,  0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-
-    -0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-
-    -0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f,
-
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-
-    -0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f, -0.5f,
-     0.5f, -0.5f,  0.5f,
-     0.5f, -0.5f,  0.5f,
-    -0.5f, -0.5f,  0.5f,
-    -0.5f, -0.5f, -0.5f,
-
-    -0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f, -0.5f,
-     0.5f,  0.5f,  0.5f,
-     0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f,  0.5f,
-    -0.5f,  0.5f, -0.5f
-    };
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
     Shader shader("../shaders/vertexShader.glsl", "../shaders/fragmentShader.glsl");
     shader.use();
 
-    glm::mat4 model(1.0f), view(1.0f), projection(1.0f);
+    Cube cube(&shader);
+
+    glm::mat4 model(1.0f), view(1.0f);
 
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
     projection = glm::perspective(glm::radians(45.0f), float(WIDTH)/float(HEIGHT), 0.1f, 100.0f);
 
-    shader.setMat4(model, "model");
-    shader.setMat4(view, "view");
-    shader.setMat4(projection, "projection");
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
@@ -122,9 +66,11 @@ int main(void) {
         model = glm::rotate(model, float(time), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::rotate(model, float(time), glm::vec3(0.0f, 1.0f, 0.0f));
         shader.setMat4(model, "model");
+        shader.setMat4(view, "view");
+        shader.setMat4(projection, "projection");
         shader.setVec4(glm::vec4(0.0f, green, 0.0f, 1.0f), "inFragColor");
 
-        glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices)/sizeof(float));
+        cube.draw();
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -136,6 +82,7 @@ int main(void) {
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    projection = glm::perspective(glm::radians(45.0f), float(width)/float(height), 0.1f, 100.0f);
 }
 
 void processInput(GLFWwindow* window) {

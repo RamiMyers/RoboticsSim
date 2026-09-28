@@ -26,5 +26,6 @@ FetchContent_MakeAvailable(glfw glm)
 
 add_library(glad src/glad.c)
 add_library(Shader src/Shader.cpp)
+add_library(Cube src/Cube.cpp)
 
-target_link_libraries(${PROJECT_NAME} glad glfw glm Shader)
+target_link_libraries(${PROJECT_NAME} glad glfw glm Shader Cube)
