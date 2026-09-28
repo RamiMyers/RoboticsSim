@@ -79,6 +79,10 @@ void Shader::setVec4(glm::vec4 vec, const char* name) {
     glUniform4fv(glGetUniformLocation(ID, name), 1, glm::value_ptr(vec));
 }
 
+void Shader::setMat4(glm::mat4 mat, const char* name) {
+    glUniformMatrix4fv(glGetUniformLocation(ID, name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
 bool shaderCompilationStatus(GLuint shader, GLenum type) {
     int success;
     char infoLog[512];
